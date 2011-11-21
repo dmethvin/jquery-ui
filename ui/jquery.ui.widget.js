@@ -376,26 +376,13 @@ $.Widget.prototype = {
 	_trigger: function( type, event, data ) {
 		var callback = this.options[ type ],
 			args;
-
-		event = $.Event( event );
-		event.type = ( type === this.widgetEventPrefix ?
-			type :
-			this.widgetEventPrefix + type ).toLowerCase();
+	
+		event = $.extend( $.Event(), event, {
+			type: (this.widgetEventPrefix + (type === this.widgetEventPrefix ? "" : type)).toLowerCase(),
+			originalEvent: event,
+			target: this.element[0]
+		});
 		data = data || {};
-
-		// copy original event properties over to the new event
-		// this would happen if we could call $.event.fix instead of $.Event
-		// but we don't have a way to force an event to be fixed multiple times
-		if ( event.originalEvent ) {
-			for ( var i = $.event.props.length, prop; i; ) {
-				prop = $.event.props[ --i ];
-				event[ prop ] = event.originalEvent[ prop ];
-			}
-		}
-
-		// the original event may come from any element
-		// so we need to reset the target on the new event
-		event.target = this.element[0];
 
 		this.element.trigger( event, data );
 
